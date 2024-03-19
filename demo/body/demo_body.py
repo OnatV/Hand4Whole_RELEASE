@@ -26,6 +26,7 @@ def parse_args():
     parser.add_argument('--gpu', type=str, dest='gpu_ids', default= "0")
     parser.add_argument('--out_dir', type=str, help='Output directory', required=True)
     parser.add_argument('--input_image_path', type=str, default= 'input_body.png')
+    parser.add_argument('--input_image_id', type=str, default= '', help = "Identifier to make output unique")
     parser.add_argument('--for_clothwild', type=bool, help='Change the output format',default=False)
     args = parser.parse_args()
 
@@ -46,6 +47,7 @@ cfg.set_args(args.gpu_ids, 'body')
 cudnn.benchmark = True
 out_dir = args.out_dir
 os.makedirs(out_dir, exist_ok=True)
+out_id = args.input_image_id
 
 # snapshot load
 model_path = './snapshot_6_body.pth.tar'
@@ -86,18 +88,18 @@ save_obj(mesh, smpl.face, 'output_body.obj')
 vis_img = img.cpu().numpy()[0].transpose(1,2,0).copy() * 255
 rendered_img = render_mesh(vis_img, mesh, smpl.face, {'focal': cfg.focal, 'princpt': cfg.princpt})
 vis_img = Image.fromarray(vis_img.astype(np.uint8))
-vis_img.save(os.path.join(out_dir, 'cropped_img_body.jpg'))
-cv2.imwrite( os.path.join(out_dir, 'render_cropped_img_body.jpg'), rendered_img)
+vis_img.save(os.path.join(out_dir, f'{out_id}_cropped_img_body.jpg'))
+Image.fromarray(rendered_img.astype(np.uint8)).save(os.path.join(out_dir, f'{out_id}_render_cropped_img_body.jpg'))
 
 vis_img = original_img.copy()
 focal = [cfg.focal[0] / cfg.input_img_shape[1] * bbox[2], cfg.focal[1] / cfg.input_img_shape[0] * bbox[3]]
 princpt = [cfg.princpt[0] / cfg.input_img_shape[1] * bbox[2] + bbox[0], cfg.princpt[1] / cfg.input_img_shape[0] * bbox[3] + bbox[1]]
 rendered_img = render_mesh(vis_img, mesh, smpl.face, {'focal': focal, 'princpt': princpt})
-cv2.imwrite( os.path.join(out_dir, 'render_original_img_body.jpg'), rendered_img)
+Image.fromarray(rendered_img.astype(np.uint8)).save(os.path.join(out_dir, f'{out_id}_render_original_img_body.jpg'))
 
 # save SMPL parameters
 smpl_pose = out['smpl_pose'].detach().cpu().numpy()[0]; smpl_shape = out['smpl_shape'].detach().cpu().numpy()[0]; 
-with open(os.path.join(out_dir, 'smpl_param.json'), 'w') as f:
+with open(os.path.join(out_dir, f'{out_id}_smpl_param.json'), 'w') as f:
     json.dump({'pose': smpl_pose.reshape(-1).tolist(), 'shape': smpl_shape.reshape(-1).tolist()}, f)
 
 # save SMPL parameters
@@ -105,7 +107,7 @@ if args.for_clothwild:
     smpl_pose = out['smpl_pose'].detach().cpu().numpy()[0]
     smpl_shape = out['smpl_shape'].detach().cpu().numpy()[0]
     cam_trans = out['cam_trans'].detach().cpu().numpy()[0]
-    with open(os.path.join(out_dir, 'smpl_param.json'), 'w') as f:
+    with open(os.path.join(out_dir, f'{out_id}_smpl_param_clothwild.json'), 'w') as f:
         json.dump({ 'smpl_param':
                         {'pose': smpl_pose.reshape(-1).tolist(), 'shape': smpl_shape.reshape(-1).tolist(), 'trans': cam_trans.reshape(-1).tolist()},
                     'cam_param':

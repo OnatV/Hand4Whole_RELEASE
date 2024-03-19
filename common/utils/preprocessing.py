@@ -7,7 +7,7 @@ from utils.human_models import smpl, mano, flame
 from utils.transforms import cam2pixel, transform_joint_to_other_db
 from plyfile import PlyData, PlyElement
 import torch
-
+import pdb
 def load_img(path, order='RGB'):
     img = cv2.imread(path, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
     if not isinstance(img, np.ndarray):
@@ -37,6 +37,7 @@ def get_bbox(joint_img, joint_valid, extend_ratio=1.2):
     return bbox
 
 def process_bbox(bbox, img_width, img_height, do_sanitize=True):
+    pdb.set_trace()
     if do_sanitize:
         # sanitize bboxes
         x, y, w, h = bbox
