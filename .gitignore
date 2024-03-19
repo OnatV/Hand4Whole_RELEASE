@@ -206,3 +206,5 @@ fabric.properties
 
 experiment/
 data/PW3D/data/
+common/utils/human_model_files/
+demo/**/snapshot*
