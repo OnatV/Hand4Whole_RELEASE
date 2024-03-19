@@ -22,7 +22,9 @@ import json
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', type=str, dest='gpu_ids')
+    parser.add_argument('--gpu', type=str, dest='gpu_ids', default= "0")
+    parser.add_argument('--out_dir', type=str, dest='Output directory')
+    parser.add_argument('--for_clothwild', action="store_true", dest='Change the output format')
     args = parser.parse_args()
 
     # test gpus
@@ -90,4 +92,16 @@ cv2.imwrite('render_original_img_body.jpg', rendered_img)
 smpl_pose = out['smpl_pose'].detach().cpu().numpy()[0]; smpl_shape = out['smpl_shape'].detach().cpu().numpy()[0]; 
 with open('smpl_param.json', 'w') as f:
     json.dump({'pose': smpl_pose.reshape(-1).tolist(), 'shape': smpl_shape.reshape(-1).tolist()}, f)
+
+# save SMPL parameters
+if args.for_clothwild:
+    smpl_pose = out['smpl_pose'].detach().cpu().numpy()[0]
+    smpl_shape = out['smpl_shape'].detach().cpu().numpy()[0]
+    cam_trans = out['cam_trans'].detach().cpu().numpy()[0]
+    with open('smpl_param.json', 'w') as f:
+        json.dump({ 'smpl_param':
+                        {'pose': smpl_pose.reshape(-1).tolist(), 'shape': smpl_shape.reshape(-1).tolist(), 'trans': cam_trans.reshape(-1).tolist()},
+                    'cam_param':
+                        {'focal': focal, 'princpt': princpt}
+                    }, f)
 
