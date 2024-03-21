@@ -37,7 +37,7 @@ def get_bbox(joint_img, joint_valid, extend_ratio=1.2):
     return bbox
 
 def process_bbox(bbox, img_width, img_height, do_sanitize=True):
-    pdb.set_trace()
+
     if do_sanitize:
         # sanitize bboxes
         x, y, w, h = bbox
